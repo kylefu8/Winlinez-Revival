@@ -5,7 +5,7 @@ os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
 import pygame
 
 from winlinez import __version__
-from winlinez.app import APP_TITLE, REPO_LABEL, REPO_URL, WinlinezApp
+from winlinez.app import APP_TITLE, AUTHOR_LABEL, REPO_LABEL, REPO_URL, WinlinezApp
 
 
 def clear_board(app: WinlinezApp) -> None:
@@ -141,11 +141,30 @@ def test_info_dialog_text_wraps_inside_modal_width() -> None:
             app.language = language
             info_lines = app._info_lines()
             assert any(f"v{__version__}" in line for line in info_lines)
-            assert any(REPO_URL in line for line in info_lines)
+            assert any(AUTHOR_LABEL in line for line in info_lines)
+            assert REPO_URL in app._repo_link_text()
             for line in info_lines:
                 wrapped = app._wrap_text(line, app.info_font, max_width)
                 assert wrapped
                 assert all(app.info_font.size(part)[0] <= max_width for part in wrapped)
+            assert all(app.info_font.size(part)[0] <= max_width for part in app._wrap_text(app._repo_link_text(), app.info_font, max_width))
+    finally:
+        pygame.quit()
+
+
+def test_info_dialog_github_link_opens_browser(monkeypatch) -> None:
+    opened: list[str] = []
+    app = WinlinezApp()
+    try:
+        monkeypatch.setattr("winlinez.app.webbrowser.open", lambda url: opened.append(url) or True)
+        app.info_open = True
+        app.draw()
+
+        assert app.info_link_rect.width > 0
+        app._handle_click(app.info_link_rect.center)
+
+        assert opened == [REPO_URL]
+        assert app.info_open
     finally:
         pygame.quit()
 

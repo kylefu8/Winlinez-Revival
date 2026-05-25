@@ -6,15 +6,15 @@
 
 ## 截图
 
-![游戏主界面](https://github.com/kylefu8/Winlinez-Revival/releases/download/v1.0.1/winlinez-revival-game.png)
+![游戏主界面](https://github.com/kylefu8/Winlinez-Revival/releases/download/v1.0.2/winlinez-revival-game.png)
 
-![中文说明弹窗](https://github.com/kylefu8/Winlinez-Revival/releases/download/v1.0.1/winlinez-revival-help-zh.png)
+![中文说明弹窗](https://github.com/kylefu8/Winlinez-Revival/releases/download/v1.0.2/winlinez-revival-help-zh.png)
 
 ## 下载
 
 推荐从 GitHub Release 下载：
 
-[下载 Winlinez Revival 1.0.1](https://github.com/kylefu8/Winlinez-Revival/releases/tag/v1.0.1)
+[下载 Winlinez Revival 1.0.2](https://github.com/kylefu8/Winlinez-Revival/releases/tag/v1.0.2)
 
 便携包里包含：
 
@@ -45,7 +45,7 @@ README.txt
 
 ## 版本与项目地址
 
-软件窗口底部会显示当前版本号和 GitHub 仓库地址。也可以点击 `i` 在说明弹窗里查看完整项目链接。
+软件窗口底部会显示当前版本号和 GitHub 仓库地址。也可以点击 `i` 在说明弹窗里查看作者信息，并点击 GitHub 链接打开项目主页。
 
 ## 高分记录
 
@@ -80,4 +80,4 @@ Winlinez Revival is a portable WinLinez / Color Lines style puzzle game for Wind
 
 It was rebuilt because the old Winlinez no longer runs reliably on newer Windows systems, while it is still loved at home. The goal is to keep the familiar puzzle experience easy to run, easy to share, and pleasant to play on modern PCs.
 
-Download the portable package from the [latest release](https://github.com/kylefu8/Winlinez-Revival/releases/tag/v1.0.1), extract it, and run `Winlinez-Revival.exe`. No installer or Python installation is required.
+Download the portable package from the [latest release](https://github.com/kylefu8/Winlinez-Revival/releases/tag/v1.0.2), extract it, and run `Winlinez-Revival.exe`. No installer or Python installation is required.

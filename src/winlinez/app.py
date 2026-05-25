@@ -6,6 +6,7 @@ import math
 import os
 from pathlib import Path
 import sys
+import webbrowser
 
 import pygame
 
@@ -17,6 +18,7 @@ from .records import HighScoreStore
 WINDOW_SIZE = (940, 604)
 REPO_URL = "https://github.com/kylefu8/Winlinez-Revival"
 REPO_LABEL = "github.com/kylefu8/Winlinez-Revival"
+AUTHOR_LABEL = "kylefu8"
 APP_TITLE = f"Winlinez Revival v{__version__}"
 FPS = 60
 CELL_SIZE = 54
@@ -49,6 +51,7 @@ TEXT_MUTED = (178, 184, 197)
 ACCENT_CYAN = (54, 220, 255)
 ACCENT_MAGENTA = (255, 88, 220)
 ACCENT_GOLD = (255, 214, 84)
+LINK_BLUE = (111, 213, 255)
 
 
 @dataclass(frozen=True)
@@ -267,6 +270,7 @@ class WinlinezApp:
             Button(pygame.Rect(710, 25, 38, 38), "info"),
         ]
         self.info_ok_rect = pygame.Rect(430, 444, 80, 34)
+        self.info_link_rect = pygame.Rect(0, 0, 0, 0)
 
     def run(self) -> int:
         while self.running:
@@ -347,6 +351,9 @@ class WinlinezApp:
 
     def _handle_click(self, pos: tuple[int, int]) -> None:
         if self.info_open:
+            if self.info_link_rect.collidepoint(pos):
+                self._open_repo()
+                return
             if self.info_ok_rect.collidepoint(pos):
                 self.info_open = False
             return
@@ -702,16 +709,36 @@ class WinlinezApp:
 
         y = modal.y + 78
         max_width = modal.width - 80
+        self.info_link_rect = pygame.Rect(0, 0, 0, 0)
         for line in self._info_lines():
             for wrapped in self._wrap_text(line, self.info_font, max_width):
                 rendered = self.info_font.render(wrapped, True, TEXT_LIGHT)
                 self.screen.blit(rendered, (modal.x + 40, y))
                 y += 22
             y += 4
+        self._draw_info_link((modal.x + 40, y), max_width)
 
         draw_round_panel(self.screen, self.info_ok_rect, (45, 50, 61), ACCENT_CYAN, radius=8, shadow=False)
         ok = self.font.render(self._text("ok"), True, TEXT_LIGHT)
         self.screen.blit(ok, ok.get_rect(center=self.info_ok_rect.center))
+
+    def _draw_info_link(self, pos: tuple[int, int], max_width: int) -> None:
+        x, y = pos
+        hover = self.info_link_rect.collidepoint(pygame.mouse.get_pos())
+        color = blend(LINK_BLUE, (255, 255, 255), 0.22 if hover else 0.0)
+        hit_rect: pygame.Rect | None = None
+        for wrapped in self._wrap_text(self._repo_link_text(), self.info_font, max_width):
+            rendered = self.info_font.render(wrapped, True, color)
+            rect = rendered.get_rect(topleft=(x, y))
+            self.screen.blit(rendered, rect)
+            pygame.draw.line(self.screen, color, (rect.left, rect.bottom + 1), (rect.right, rect.bottom + 1), 1)
+            inflated = rect.inflate(8, 6)
+            hit_rect = inflated if hit_rect is None else hit_rect.union(inflated)
+            y += 22
+        self.info_link_rect = hit_rect or pygame.Rect(0, 0, 0, 0)
+
+    def _open_repo(self) -> None:
+        webbrowser.open(REPO_URL)
 
     def _trigger_king_effect(self) -> None:
         self.king_flash_until = pygame.time.get_ticks() + 3200
@@ -839,11 +866,14 @@ class WinlinezApp:
         lines = list(self._text("info_lines"))
         if self.language == "zh":
             lines.append(f"版本：v{__version__}")
-            lines.append(f"GitHub：{REPO_URL}")
+            lines.append(f"作者：{AUTHOR_LABEL}")
         else:
             lines.append(f"Version: v{__version__}")
-            lines.append(f"GitHub: {REPO_URL}")
+            lines.append(f"Author: {AUTHOR_LABEL}")
         return lines
+
+    def _repo_link_text(self) -> str:
+        return f"GitHub：{REPO_URL}" if self.language == "zh" else f"GitHub: {REPO_URL}"
 
     def _status_text(self, message: str) -> str:
         if self.language == "zh":

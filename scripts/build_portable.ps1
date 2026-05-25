@@ -47,7 +47,7 @@ Remove-WorkspaceChild (Join-Path $Root "build")
 Remove-WorkspaceChild (Join-Path $Root "dist")
 
 $AppName = "Winlinez-Revival"
-$Version = "1.0.1"
+$Version = "1.0.2"
 $RepoUrl = "https://github.com/kylefu8/Winlinez-Revival"
 $PortableDir = Join-Path $Root "dist\$AppName"
 $ExePath = Join-Path $PortableDir "$AppName.exe"
