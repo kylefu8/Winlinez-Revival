@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "winlinez"
+version = "1.0.0"
+description = "A portable WinLinez Revival / Color Lines style puzzle game."
+requires-python = ">=3.12"
+dependencies = ["pygame>=2.6,<3"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8,<9",
+    "pyinstaller>=6,<7",
+]
+
+[project.scripts]
+winlinez = "winlinez.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

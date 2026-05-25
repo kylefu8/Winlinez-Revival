@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local environments
+.venv/
+venv/
+env/
+
+# Build and release outputs
+build/
+dist/
+*.spec
+
+# Local smoke-test screenshots
+artifacts/
+
+# Local score/save data
+winlinez_high_score.json
+
+# Local env/config
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
