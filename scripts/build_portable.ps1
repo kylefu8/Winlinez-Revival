@@ -47,6 +47,8 @@ Remove-WorkspaceChild (Join-Path $Root "build")
 Remove-WorkspaceChild (Join-Path $Root "dist")
 
 $AppName = "Winlinez-Revival"
+$Version = "1.0.1"
+$RepoUrl = "https://github.com/kylefu8/Winlinez-Revival"
 $PortableDir = Join-Path $Root "dist\$AppName"
 $ExePath = Join-Path $PortableDir "$AppName.exe"
 $ZipPath = Join-Path $Root "dist\$AppName-portable.zip"
@@ -70,6 +72,9 @@ Remove-Item -LiteralPath $SpecPath -Force -ErrorAction SilentlyContinue
 $Readme = @"
 Winlinez Revival Portable
 =========================
+
+Version: $Version
+GitHub: $RepoUrl
 
 Run Winlinez-Revival.exe to play. It is a single-file portable build and does not need an installer or Python.
 

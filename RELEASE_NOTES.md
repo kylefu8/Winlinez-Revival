@@ -1,16 +1,22 @@
-# Winlinez Revival 1.0.0
+# Winlinez Revival 1.0.1
 
 ## 中文说明
 
-这是 **Winlinez Revival** 的第一个公开版本。它是一个 WinLinez / Color Lines 风格的 Windows 便携复刻版，目标很简单：让那个很多年前的小球连线游戏，在现在的 Windows 上继续顺手地跑起来。
+这是 **Winlinez Revival 1.0.1**。这个版本在软件界面里加入了版本号和 GitHub 仓库信息，方便玩家确认自己运行的是哪个版本，也方便从游戏里找到项目主页。
 
-这个版本的起点也很私人：老版本已经不太能运行了，但家里的父母依然很喜欢玩。于是我重新做了一个不需要安装、不需要 Python、拷贝就能玩的版本，尽量保留熟悉的节奏，也让界面和操作更适合现在的电脑。
+这个项目的起点很简单，也有一点私人：老版本 Winlinez 在新的 Windows 上已经不太能运行了，但家里的父母依然很喜欢玩这个游戏。于是我重新做了一个不需要安装、不需要 Python、拷贝就能玩的版本，尽量保留熟悉的小球连线节奏，同时让界面、按钮和动画更适合现在的电脑。
 
 ## 截图
 
-![游戏主界面](https://github.com/kylefu8/Winlinez-Revival/releases/download/v1.0.0/winlinez-revival-game.png)
+![游戏主界面](https://github.com/kylefu8/Winlinez-Revival/releases/download/v1.0.1/winlinez-revival-game.png)
 
-![中文说明弹窗](https://github.com/kylefu8/Winlinez-Revival/releases/download/v1.0.0/winlinez-revival-help-zh.png)
+![中文说明弹窗](https://github.com/kylefu8/Winlinez-Revival/releases/download/v1.0.1/winlinez-revival-help-zh.png)
+
+## 本次更新
+
+- 主界面底部新增版本号和 GitHub 仓库地址。
+- `i` 说明弹窗新增版本信息和完整 GitHub 链接。
+- README 同步更新为 `v1.0.1` 下载和截图链接。
 
 ## 主要特性
 
@@ -35,8 +41,8 @@ Winlinez-Revival.exe
 
 ## English
 
-Winlinez Revival is a portable WinLinez / Color Lines style puzzle game for Windows. It was rebuilt because the old game no longer runs reliably on newer Windows systems, while it is still loved at home.
+Winlinez Revival 1.0.1 adds visible version and GitHub repository information inside the app.
 
-This release provides a self-contained Windows exe, bilingual Chinese/English UI, animated ball movement, classic line-clearing rules, King and Challenger score effects, and local best-score storage beside the exe.
+The footer now shows the version and repository, and the in-game `i` dialog includes the full GitHub link. This makes it easier for players to identify the build and find the project page.
 
 Download `Winlinez-Revival-portable.zip`, extract it, and run `Winlinez-Revival.exe`. No installer or Python installation is required.

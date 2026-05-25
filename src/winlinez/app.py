@@ -9,12 +9,15 @@ import sys
 
 import pygame
 
+from . import __version__
 from .game import COLORS, Cell, GameState
 from .records import HighScoreStore
 
 
 WINDOW_SIZE = (940, 604)
-APP_TITLE = "Winlinez Revival"
+REPO_URL = "https://github.com/kylefu8/Winlinez-Revival"
+REPO_LABEL = "github.com/kylefu8/Winlinez-Revival"
+APP_TITLE = f"Winlinez Revival v{__version__}"
 FPS = 60
 CELL_SIZE = 54
 BOARD_ORIGIN = (225, 82)
@@ -475,6 +478,9 @@ class WinlinezApp:
         rect = pygame.Rect(16, 574, 908, 22)
         draw_round_panel(self.screen, rect, (30, 32, 39), (78, 84, 99), radius=8, shadow=False)
         self._draw_text(self._status_text(self.game.message), (28, 577), self.small_font, TEXT_MUTED)
+        footer = self._footer_text()
+        footer_surface = self.small_font.render(footer, True, (131, 171, 189))
+        self.screen.blit(footer_surface, footer_surface.get_rect(midright=(rect.right - 14, rect.centery + 1)))
 
     def _draw_board(self) -> None:
         board_frame = pygame.Rect(BOARD_ORIGIN[0] - 2, BOARD_ORIGIN[1] - 2, BOARD_SIZE + 4, BOARD_SIZE + 4)
@@ -688,7 +694,7 @@ class WinlinezApp:
         overlay.fill((0, 0, 0, 155))
         self.screen.blit(overlay, (0, 0))
 
-        modal = pygame.Rect(150, 78, 640, 460)
+        modal = pygame.Rect(105, 58, 730, 500)
         self.info_ok_rect = pygame.Rect(modal.centerx - 40, modal.bottom - 48, 80, 34)
         draw_round_panel(self.screen, modal, (35, 37, 46), ACCENT_CYAN, radius=16)
         title = self.info_title_font.render(self._text("info_title"), True, TEXT_LIGHT)
@@ -696,7 +702,7 @@ class WinlinezApp:
 
         y = modal.y + 78
         max_width = modal.width - 80
-        for line in self._text("info_lines"):
+        for line in self._info_lines():
             for wrapped in self._wrap_text(line, self.info_font, max_width):
                 rendered = self.info_font.render(wrapped, True, TEXT_LIGHT)
                 self.screen.blit(rendered, (modal.x + 40, y))
@@ -825,6 +831,19 @@ class WinlinezApp:
 
     def _text(self, key: str):
         return TEXT[self.language][key]
+
+    def _footer_text(self) -> str:
+        return f"v{__version__} | {REPO_LABEL}"
+
+    def _info_lines(self) -> list[str]:
+        lines = list(self._text("info_lines"))
+        if self.language == "zh":
+            lines.append(f"版本：v{__version__}")
+            lines.append(f"GitHub：{REPO_URL}")
+        else:
+            lines.append(f"Version: v{__version__}")
+            lines.append(f"GitHub: {REPO_URL}")
+        return lines
 
     def _status_text(self, message: str) -> str:
         if self.language == "zh":

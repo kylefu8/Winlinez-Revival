@@ -4,7 +4,8 @@ os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
 
 import pygame
 
-from winlinez.app import APP_TITLE, WinlinezApp
+from winlinez import __version__
+from winlinez.app import APP_TITLE, REPO_LABEL, REPO_URL, WinlinezApp
 
 
 def clear_board(app: WinlinezApp) -> None:
@@ -117,6 +118,8 @@ def test_language_toggle_and_info_dialog() -> None:
     app = WinlinezApp()
     try:
         assert pygame.display.get_caption()[0] == APP_TITLE
+        assert f"v{__version__}" in APP_TITLE
+        assert app._footer_text() == f"v{__version__} | {REPO_LABEL}"
         assert app._button_label("new") == "重开"
         app._handle_click(app.buttons[2].rect.center)
         assert app.language == "en"
@@ -133,10 +136,13 @@ def test_language_toggle_and_info_dialog() -> None:
 def test_info_dialog_text_wraps_inside_modal_width() -> None:
     app = WinlinezApp()
     try:
-        max_width = 640 - 80
+        max_width = 730 - 80
         for language in ("zh", "en"):
             app.language = language
-            for line in app._text("info_lines"):
+            info_lines = app._info_lines()
+            assert any(f"v{__version__}" in line for line in info_lines)
+            assert any(REPO_URL in line for line in info_lines)
+            for line in info_lines:
                 wrapped = app._wrap_text(line, app.info_font, max_width)
                 assert wrapped
                 assert all(app.info_font.size(part)[0] <= max_width for part in wrapped)
