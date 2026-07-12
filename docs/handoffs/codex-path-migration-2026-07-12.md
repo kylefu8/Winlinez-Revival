@@ -8,6 +8,8 @@
 | Remote | `https://github.com/kylefu8/Winlinez-Revival.git` |
 | Migrated HEAD | `166a76ddafc2f966840b77e622224dec7cfef6c3` |
 | Prior Codex thread | `019e5ee1-74d6-7f71-9c30-1bd28f4c953b` |
+| Windows continuation thread | `019f5612-eeb1-7d50-bd19-08f809f6aead` |
+| Continuation created | `2026-07-12` |
 
 ## Path handoff
 
