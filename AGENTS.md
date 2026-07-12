@@ -7,7 +7,7 @@
 
 ## Supported environment and verification
 
-- Use Python `>=3.12` on Windows. The verified packaging interpreter is CPython 3.12.
+- Use CPython `3.12.x` on Windows for the verified workflow.
 - Create the local environment with `py -3.12 -m venv .venv`, then install `requirements.txt`.
 - Run the test suite with `.\.venv\Scripts\python.exe -m pytest -q`.
 - Run the supported portable-package verification with `.\scripts\build_portable.ps1`.
