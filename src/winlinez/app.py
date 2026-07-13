@@ -20,7 +20,10 @@ REPO_URL = "https://github.com/kylefu8/Winlinez-Revival"
 REPO_LABEL = "github.com/kylefu8/Winlinez-Revival"
 AUTHOR_LABEL = "kylefu8"
 APP_TITLE = f"Winlinez Revival v{__version__}"
+APP_ICON_FILENAME = "winlinez-icon.png"
 FPS = 60
+MOVE_MS_PER_CELL = 60
+MOVE_MIN_DURATION_MS = 140
 CELL_SIZE = 54
 BOARD_ORIGIN = (225, 82)
 BOARD_SIZE = CELL_SIZE * GameState.cols
@@ -68,6 +71,92 @@ class MoveAnimation:
     duration_ms: int
 
 
+@dataclass(frozen=True)
+class Theme:
+    key: str
+    name_zh: str
+    name_en: str
+    bg_top: tuple[int, int, int]
+    bg_bottom: tuple[int, int, int]
+    panel_bg: tuple[int, int, int]
+    panel_bg_2: tuple[int, int, int]
+    panel_border: tuple[int, int, int]
+    cell_bg: tuple[int, int, int]
+    cell_alt: tuple[int, int, int]
+    cell_border: tuple[int, int, int]
+    cell_highlight: tuple[int, int, int]
+    text_light: tuple[int, int, int]
+    text_muted: tuple[int, int, int]
+    accent_primary: tuple[int, int, int]
+    accent_secondary: tuple[int, int, int]
+    accent_gold: tuple[int, int, int]
+    link: tuple[int, int, int]
+
+
+THEMES = (
+    Theme(
+        key="neon",
+        name_zh="霓虹夜",
+        name_en="Neon",
+        bg_top=BG_TOP,
+        bg_bottom=BG_BOTTOM,
+        panel_bg=PANEL_BG,
+        panel_bg_2=PANEL_BG_2,
+        panel_border=PANEL_BORDER,
+        cell_bg=CELL_BG,
+        cell_alt=(43, 45, 54),
+        cell_border=CELL_BORDER,
+        cell_highlight=CELL_HOVER,
+        text_light=TEXT_LIGHT,
+        text_muted=TEXT_MUTED,
+        accent_primary=ACCENT_CYAN,
+        accent_secondary=ACCENT_MAGENTA,
+        accent_gold=ACCENT_GOLD,
+        link=LINK_BLUE,
+    ),
+    Theme(
+        key="ocean",
+        name_zh="深海蓝",
+        name_en="Ocean",
+        bg_top=(8, 22, 33),
+        bg_bottom=(19, 47, 66),
+        panel_bg=(20, 42, 56),
+        panel_bg_2=(28, 57, 73),
+        panel_border=(63, 116, 137),
+        cell_bg=(27, 54, 68),
+        cell_alt=(31, 61, 76),
+        cell_border=(62, 99, 116),
+        cell_highlight=(82, 207, 222),
+        text_light=(235, 249, 250),
+        text_muted=(157, 193, 201),
+        accent_primary=(62, 226, 214),
+        accent_secondary=(92, 162, 255),
+        accent_gold=(255, 207, 92),
+        link=(105, 220, 238),
+    ),
+    Theme(
+        key="amber",
+        name_zh="暖金棕",
+        name_en="Amber",
+        bg_top=(30, 20, 16),
+        bg_bottom=(67, 38, 31),
+        panel_bg=(55, 38, 32),
+        panel_bg_2=(72, 49, 40),
+        panel_border=(133, 91, 70),
+        cell_bg=(65, 48, 42),
+        cell_alt=(73, 53, 45),
+        cell_border=(112, 79, 65),
+        cell_highlight=(255, 175, 85),
+        text_light=(255, 244, 229),
+        text_muted=(205, 181, 158),
+        accent_primary=(255, 151, 72),
+        accent_secondary=(255, 102, 130),
+        accent_gold=(255, 210, 105),
+        link=(255, 183, 115),
+    ),
+)
+
+
 def clamp(value: int) -> int:
     return max(0, min(255, value))
 
@@ -99,6 +188,11 @@ def load_font(size: int, bold: bool = False) -> pygame.font.Font:
     font = pygame.font.Font(None, size)
     font.set_bold(bold)
     return font
+
+
+def asset_path(filename: str) -> Path:
+    root = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[2]))
+    return root / "assets" / filename
 
 
 def draw_bevel(surface: pygame.Surface, rect: pygame.Rect, raised: bool = True, fill=None, width: int = 2) -> None:
@@ -166,6 +260,7 @@ TEXT = {
         "next": "下组颜色",
         "new": "重开",
         "quit": "结束",
+        "theme": "主题",
         "language": "En/中",
         "info": "i",
         "king": "国王",
@@ -190,6 +285,7 @@ TEXT = {
             "如果本步没有消除，会补入顶部预告的 3 个小球。",
             "重开：点“重开”，也可以按 N 或 F2；结束：点“结束”或按 Esc。",
             "撤销：按 U 或 Backspace 可撤销上一次有效移动。",
+            "主题：点击顶部“主题”按钮或按 T 切换界面配色。",
             "最高分保存在 exe 同目录的 winlinez_high_score.json。",
             "当当前分超过最高分时，挑战者升高，国王降低。",
             "这个版本是因为老游戏在新系统上不易运行，为家人继续保留那份乐趣。",
@@ -201,6 +297,7 @@ TEXT = {
         "next": "Next",
         "new": "New",
         "quit": "Quit",
+        "theme": "Theme",
         "language": "En/中",
         "info": "i",
         "king": "King",
@@ -225,6 +322,7 @@ TEXT = {
             "If no line is cleared, the next three preview balls are added.",
             "Restart: click New, or press N/F2. Quit: click Quit or press Esc.",
             "Undo: press U or Backspace to revert the last valid move.",
+            "Theme: click the Theme button or press T to change the colors.",
             "Best score is saved beside the exe as winlinez_high_score.json.",
             "When the challenger beats the best score, the challenger rises and the king drops.",
             "This version exists because the old game no longer runs well on modern Windows, but it is still loved at home.",
@@ -246,6 +344,8 @@ MESSAGE_KEYS = {
 class WinlinezApp:
     def __init__(self) -> None:
         pygame.init()
+        icon = pygame.image.load(asset_path(APP_ICON_FILENAME))
+        pygame.display.set_icon(pygame.transform.smoothscale(icon, (64, 64)))
         pygame.display.set_caption(APP_TITLE)
         self.screen = pygame.display.set_mode(WINDOW_SIZE)
         self.clock = pygame.time.Clock()
@@ -253,6 +353,7 @@ class WinlinezApp:
         self.game = GameState(best_score=self.score_store.load())
         self.running = True
         self.language = "zh"
+        self.theme_index = 0
         self.info_open = False
         self.king_flash_until = 0
         self.moving: MoveAnimation | None = None
@@ -266,11 +367,16 @@ class WinlinezApp:
         self.buttons = [
             Button(pygame.Rect(226, 25, 70, 38), "new"),
             Button(pygame.Rect(306, 25, 70, 38), "quit"),
-            Button(pygame.Rect(626, 25, 74, 38), "language"),
-            Button(pygame.Rect(710, 25, 38, 38), "info"),
+            Button(pygame.Rect(652, 25, 64, 38), "language"),
+            Button(pygame.Rect(726, 25, 38, 38), "info"),
+            Button(pygame.Rect(584, 25, 58, 38), "theme"),
         ]
         self.info_ok_rect = pygame.Rect(430, 444, 80, 34)
         self.info_link_rect = pygame.Rect(0, 0, 0, 0)
+
+    @property
+    def theme(self) -> Theme:
+        return THEMES[self.theme_index]
 
     def run(self) -> int:
         while self.running:
@@ -316,6 +422,8 @@ class WinlinezApp:
             self._quit()
         elif key == pygame.K_i:
             self.info_open = True
+        elif key == pygame.K_t:
+            self._cycle_theme()
         elif self._is_new_game_key(key, text, scancode):
             self._new_game()
         elif key in (pygame.K_BACKSPACE, pygame.K_u):
@@ -368,6 +476,8 @@ class WinlinezApp:
                     self.language = "en" if self.language == "zh" else "zh"
                 elif button.action == "info":
                     self.info_open = True
+                elif button.action == "theme":
+                    self._cycle_theme()
                 return
 
         if self.moving is not None:
@@ -399,9 +509,13 @@ class WinlinezApp:
             self.game.selected = None
             return
 
-        duration = max(220, (len(path) - 1) * 92)
+        duration = max(MOVE_MIN_DURATION_MS, (len(path) - 1) * MOVE_MS_PER_CELL)
         self.moving = MoveAnimation(path=path, color_id=color_id, started_at=pygame.time.get_ticks(), duration_ms=duration)
         self.game.message = "移动中"
+
+    def _cycle_theme(self) -> None:
+        self.theme_index = (self.theme_index + 1) % len(THEMES)
+        self.game.message = f"theme:{self.theme.key}"
 
     def _update_animation(self) -> None:
         if self.moving is None:
@@ -437,80 +551,120 @@ class WinlinezApp:
         return self._cell_rect(cell).center
 
     def _draw_outer_frame(self) -> None:
-        draw_vertical_gradient(self.screen, self.screen.get_rect(), BG_TOP, BG_BOTTOM)
+        theme = self.theme
+        draw_vertical_gradient(self.screen, self.screen.get_rect(), theme.bg_top, theme.bg_bottom)
         outer = pygame.Rect(6, 8, WINDOW_SIZE[0] - 12, WINDOW_SIZE[1] - 14)
-        pygame.draw.rect(self.screen, (79, 85, 101), outer, width=1, border_radius=14)
+        pygame.draw.rect(self.screen, theme.panel_border, outer, width=1, border_radius=14)
 
     def _draw_top_panel(self) -> None:
+        theme = self.theme
         panel = pygame.Rect(16, 14, 908, 60)
-        draw_round_panel(self.screen, panel, PANEL_BG, PANEL_BORDER, radius=13)
+        draw_round_panel(self.screen, panel, theme.panel_bg, theme.panel_border, radius=13)
 
-        self._draw_text(self._text("best"), (36, 36), self.small_font, TEXT_MUTED)
-        self._draw_score_box(pygame.Rect(100, 26, 104, 36), self.game.best_score, ACCENT_GOLD)
+        self._draw_text(self._text("best"), (36, 36), self.small_font, theme.text_muted)
+        self._draw_score_box(pygame.Rect(100, 26, 104, 36), self.game.best_score, theme.accent_gold)
 
         for button in self.buttons:
             self._draw_button(button)
 
-        self._draw_text(self._text("next"), (390, 36), self.small_font, TEXT_MUTED)
+        self._draw_text(self._text("next"), (390, 36), self.small_font, theme.text_muted)
         for index, color_id in enumerate(self.game.next_colors):
-            rect = pygame.Rect(450 + index * 54, 24, 42, 40)
-            draw_round_panel(self.screen, rect, (29, 31, 38), (83, 89, 105), radius=9, shadow=False)
+            rect = pygame.Rect(446 + index * 46, 24, 40, 40)
+            draw_round_panel(
+                self.screen,
+                rect,
+                blend(theme.panel_bg, (0, 0, 0), 0.35),
+                theme.panel_border,
+                radius=9,
+                shadow=False,
+            )
             self._draw_ball(rect.center, COLORS[color_id].rgb, radius=11)
 
-        self._draw_text(self._text("current"), (762, 36), self.small_font, TEXT_MUTED)
-        self._draw_score_box(pygame.Rect(818, 26, 90, 36), self.game.score, ACCENT_CYAN)
+        self._draw_text(self._text("current"), (778, 36), self.small_font, theme.text_muted)
+        self._draw_score_box(pygame.Rect(818, 26, 90, 36), self.game.score, theme.accent_primary)
 
     def _draw_button(self, button: Button) -> None:
+        theme = self.theme
         hover = button.rect.collidepoint(pygame.mouse.get_pos())
-        fill = PANEL_BG_2 if hover else (32, 34, 42)
+        fill = theme.panel_bg_2 if hover else blend(theme.panel_bg, (0, 0, 0), 0.15)
         border = {
-            "new": ACCENT_CYAN,
+            "new": theme.accent_primary,
             "quit": (255, 122, 138),
-            "language": ACCENT_GOLD,
-            "info": ACCENT_MAGENTA,
-        }.get(button.action, PANEL_BORDER)
+            "theme": theme.accent_primary,
+            "language": theme.accent_gold,
+            "info": theme.accent_secondary,
+        }.get(button.action, theme.panel_border)
         draw_round_panel(self.screen, button.rect, fill, border, radius=9, shadow=False)
-        label = self.font.render(self._button_label(button.action), True, TEXT_LIGHT)
+        font = self.small_font if button.action == "theme" else self.font
+        label = font.render(self._button_label(button.action), True, theme.text_light)
         self.screen.blit(label, label.get_rect(center=button.rect.center))
+        if button.action == "theme":
+            pygame.draw.line(
+                self.screen,
+                theme.accent_secondary,
+                (button.rect.x + 12, button.rect.bottom - 5),
+                (button.rect.right - 12, button.rect.bottom - 5),
+                2,
+            )
 
-    def _draw_score_box(self, rect: pygame.Rect, score: int, accent: tuple[int, int, int] = ACCENT_CYAN) -> None:
-        draw_round_panel(self.screen, rect, (7, 9, 14), blend(accent, (255, 255, 255), 0.15), radius=8, shadow=False)
+    def _draw_score_box(self, rect: pygame.Rect, score: int, accent: tuple[int, int, int] | None = None) -> None:
+        theme = self.theme
+        accent = accent or theme.accent_primary
+        fill = blend(theme.panel_bg, (0, 0, 0), 0.72)
+        draw_round_panel(self.screen, rect, fill, blend(accent, (255, 255, 255), 0.15), radius=8, shadow=False)
         inner = rect.inflate(-10, -8)
-        text = self.digit_font.render(str(score), True, TEXT_LIGHT)
+        text = self.digit_font.render(str(score), True, theme.text_light)
         glow = self.digit_font.render(str(score), True, accent)
         self.screen.blit(glow, glow.get_rect(midright=(inner.right - 5, inner.centery + 1)))
         self.screen.blit(text, text.get_rect(midright=(inner.right - 6, inner.centery)))
 
     def _draw_status_bar(self) -> None:
+        theme = self.theme
         rect = pygame.Rect(16, 574, 908, 22)
-        draw_round_panel(self.screen, rect, (30, 32, 39), (78, 84, 99), radius=8, shadow=False)
-        self._draw_text(self._status_text(self.game.message), (28, 577), self.small_font, TEXT_MUTED)
+        draw_round_panel(self.screen, rect, theme.panel_bg, theme.panel_border, radius=8, shadow=False)
+        self._draw_text(self._status_text(self.game.message), (28, 577), self.small_font, theme.text_muted)
         footer = self._footer_text()
-        footer_surface = self.small_font.render(footer, True, (131, 171, 189))
+        footer_surface = self.small_font.render(footer, True, blend(theme.text_muted, theme.accent_primary, 0.35))
         self.screen.blit(footer_surface, footer_surface.get_rect(midright=(rect.right - 14, rect.centery + 1)))
 
     def _draw_board(self) -> None:
+        theme = self.theme
         board_frame = pygame.Rect(BOARD_ORIGIN[0] - 2, BOARD_ORIGIN[1] - 2, BOARD_SIZE + 4, BOARD_SIZE + 4)
-        draw_round_panel(self.screen, board_frame, (24, 26, 33), (92, 98, 113), radius=10)
+        draw_round_panel(
+            self.screen,
+            board_frame,
+            blend(theme.panel_bg, (0, 0, 0), 0.4),
+            theme.panel_border,
+            radius=10,
+        )
 
         hidden_cell = self.moving.path[0] if self.moving else None
+        hovered_cell = None
+        if self.moving is None and not self.info_open and not self.game.game_over:
+            hovered_cell = self._cell_from_pos(pygame.mouse.get_pos())
         for row in range(GameState.rows):
             for col in range(GameState.cols):
                 cell = (row, col)
                 rect = self._cell_rect(cell)
                 cell_rect = rect.inflate(-4, -4)
-                pygame.draw.rect(self.screen, CELL_BG, cell_rect, border_radius=8)
-                pygame.draw.rect(self.screen, CELL_BORDER, cell_rect, width=1, border_radius=8)
+                fill = theme.cell_bg if (row + col) % 2 == 0 else theme.cell_alt
+                selected = self.game.selected == cell and self.moving is None
+                hovered = hovered_cell == cell
+                if hovered:
+                    fill = blend(fill, theme.accent_primary, 0.16)
+                border = theme.accent_gold if selected else theme.accent_primary if hovered else theme.cell_border
+                border_width = 2 if selected or hovered else 1
+                pygame.draw.rect(self.screen, fill, cell_rect, border_radius=8)
+                pygame.draw.rect(self.screen, border, cell_rect, width=border_width, border_radius=8)
                 pygame.draw.line(
                     self.screen,
-                    CELL_HOVER,
+                    blend(fill, theme.cell_highlight, 0.4),
                     (cell_rect.x + 7, cell_rect.y + 1),
                     (cell_rect.right - 7, cell_rect.y + 1),
                 )
 
                 color_id = self.game.board[row][col]
                 if color_id is not None and cell != hidden_cell:
-                    selected = self.game.selected == cell and self.moving is None
                     self._draw_ball(rect.center, COLORS[color_id].rgb, selected=selected)
 
         if self.moving is not None:
@@ -532,11 +686,23 @@ class WinlinezApp:
         return (x, y), bounce
 
     def _draw_character_stage(self, rect: pygame.Rect, king: bool) -> None:
-        draw_round_panel(self.screen, rect, (9, 10, 15), (68, 74, 91), radius=12)
+        theme = self.theme
+        draw_round_panel(
+            self.screen,
+            rect,
+            blend(theme.panel_bg, (0, 0, 0), 0.68),
+            theme.panel_border,
+            radius=12,
+        )
         inner = rect.inflate(-8, -8)
-        draw_vertical_gradient(self.screen, inner, (12, 13, 19), (28, 22, 37))
-        pygame.draw.rect(self.screen, (58, 64, 79), inner, width=1, border_radius=9)
-        glow_color = ACCENT_GOLD if king else ACCENT_MAGENTA
+        draw_vertical_gradient(
+            self.screen,
+            inner,
+            blend(theme.bg_top, (0, 0, 0), 0.25),
+            blend(theme.bg_bottom, theme.panel_bg_2, 0.35),
+        )
+        pygame.draw.rect(self.screen, theme.panel_border, inner, width=1, border_radius=9)
+        glow_color = theme.accent_gold if king else theme.accent_secondary
         pygame.draw.line(self.screen, glow_color, (inner.x + 18, inner.y + 14), (inner.right - 18, inner.y + 14), 1)
 
         phase = pygame.time.get_ticks() / 260
@@ -547,7 +713,7 @@ class WinlinezApp:
             self._draw_challenger_character(rect, phase, self._character_y_offset(king=False))
             label = self._text("challenger")
 
-        label_surface = self.label_font.render(label, True, (238, 238, 238))
+        label_surface = self.label_font.render(label, True, theme.text_light)
         shadow = self.label_font.render(label, True, (74, 74, 74))
         label_rect = label_surface.get_rect(center=(rect.centerx, rect.bottom - 78))
         self.screen.blit(shadow, label_rect.move(2, 2))
@@ -647,16 +813,17 @@ class WinlinezApp:
         pygame.draw.ellipse(self.screen, (120, 125, 125), pygame.Rect(rect.x - 7, rect.bottom - 7, rect.width + 14, 14), 2)
 
     def _draw_game_over(self) -> None:
+        theme = self.theme
         overlay = pygame.Surface(WINDOW_SIZE, pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 150))
         self.screen.blit(overlay, (0, 0))
         modal = pygame.Rect(318, 216, 304, 126)
-        draw_round_panel(self.screen, modal, (35, 37, 46), ACCENT_MAGENTA, radius=14)
-        title = self.title_font.render(self._text("game_over"), True, TEXT_LIGHT)
+        draw_round_panel(self.screen, modal, theme.panel_bg_2, theme.accent_secondary, radius=14)
+        title = self.title_font.render(self._text("game_over"), True, theme.text_light)
         self.screen.blit(title, title.get_rect(center=(470, 256)))
-        score = self.font.render(self._text("score").format(score=self.game.score), True, ACCENT_GOLD)
+        score = self.font.render(self._text("score").format(score=self.game.score), True, theme.accent_gold)
         self.screen.blit(score, score.get_rect(center=(470, 290)))
-        hint = self.small_font.render(self._text("restart_hint"), True, TEXT_MUTED)
+        hint = self.small_font.render(self._text("restart_hint"), True, theme.text_muted)
         self.screen.blit(hint, hint.get_rect(center=(470, 314)))
 
     def _wrap_text(self, text: str, font: pygame.font.Font, max_width: int) -> list[str]:
@@ -697,14 +864,15 @@ class WinlinezApp:
         return lines
 
     def _draw_info_dialog(self) -> None:
+        theme = self.theme
         overlay = pygame.Surface(WINDOW_SIZE, pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 155))
         self.screen.blit(overlay, (0, 0))
 
         modal = pygame.Rect(105, 58, 730, 500)
         self.info_ok_rect = pygame.Rect(modal.centerx - 40, modal.bottom - 48, 80, 34)
-        draw_round_panel(self.screen, modal, (35, 37, 46), ACCENT_CYAN, radius=16)
-        title = self.info_title_font.render(self._text("info_title"), True, TEXT_LIGHT)
+        draw_round_panel(self.screen, modal, theme.panel_bg_2, theme.accent_primary, radius=16)
+        title = self.info_title_font.render(self._text("info_title"), True, theme.text_light)
         self.screen.blit(title, title.get_rect(center=(modal.centerx, modal.y + 38)))
 
         y = modal.y + 78
@@ -712,20 +880,21 @@ class WinlinezApp:
         self.info_link_rect = pygame.Rect(0, 0, 0, 0)
         for line in self._info_lines():
             for wrapped in self._wrap_text(line, self.info_font, max_width):
-                rendered = self.info_font.render(wrapped, True, TEXT_LIGHT)
+                rendered = self.info_font.render(wrapped, True, theme.text_light)
                 self.screen.blit(rendered, (modal.x + 40, y))
                 y += 22
             y += 4
         self._draw_info_link((modal.x + 40, y), max_width)
 
-        draw_round_panel(self.screen, self.info_ok_rect, (45, 50, 61), ACCENT_CYAN, radius=8, shadow=False)
-        ok = self.font.render(self._text("ok"), True, TEXT_LIGHT)
+        draw_round_panel(self.screen, self.info_ok_rect, theme.panel_bg, theme.accent_primary, radius=8, shadow=False)
+        ok = self.font.render(self._text("ok"), True, theme.text_light)
         self.screen.blit(ok, ok.get_rect(center=self.info_ok_rect.center))
 
     def _draw_info_link(self, pos: tuple[int, int], max_width: int) -> None:
+        theme = self.theme
         x, y = pos
         hover = self.info_link_rect.collidepoint(pygame.mouse.get_pos())
-        color = blend(LINK_BLUE, (255, 255, 255), 0.22 if hover else 0.0)
+        color = blend(theme.link, (255, 255, 255), 0.22 if hover else 0.0)
         hit_rect: pygame.Rect | None = None
         for wrapped in self._wrap_text(self._repo_link_text(), self.info_font, max_width):
             rendered = self.info_font.render(wrapped, True, color)
@@ -876,6 +1045,10 @@ class WinlinezApp:
         return f"GitHub：{REPO_URL}" if self.language == "zh" else f"GitHub: {REPO_URL}"
 
     def _status_text(self, message: str) -> str:
+        if message.startswith("theme:"):
+            name = self.theme.name_zh if self.language == "zh" else self.theme.name_en
+            label = "主题" if self.language == "zh" else "Theme"
+            return f"{label}：{name}" if self.language == "zh" else f"{label}: {name}"
         if self.language == "zh":
             return message
         if message.startswith("消除 ") and message.endswith(" 个小球"):

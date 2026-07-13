@@ -5,7 +5,16 @@ os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
 import pygame
 
 from winlinez import __version__
-from winlinez.app import APP_TITLE, AUTHOR_LABEL, REPO_LABEL, REPO_URL, WinlinezApp
+from winlinez.app import (
+    APP_TITLE,
+    AUTHOR_LABEL,
+    MOVE_MIN_DURATION_MS,
+    MOVE_MS_PER_CELL,
+    REPO_LABEL,
+    REPO_URL,
+    THEMES,
+    WinlinezApp,
+)
 
 
 def clear_board(app: WinlinezApp) -> None:
@@ -30,6 +39,7 @@ def test_move_animation_commits_move_when_finished() -> None:
         app._handle_board_click((0, 4))
 
         assert app.moving is not None
+        assert app.moving.duration_ms == max(MOVE_MIN_DURATION_MS, 2 * MOVE_MS_PER_CELL)
         app.moving.started_at -= app.moving.duration_ms
         app._update_animation()
 
@@ -129,6 +139,34 @@ def test_language_toggle_and_info_dialog() -> None:
         assert app.info_open
         app._handle_click(app.info_ok_rect.center)
         assert not app.info_open
+    finally:
+        pygame.quit()
+
+
+def test_theme_button_and_keyboard_cycle_themes() -> None:
+    app = WinlinezApp()
+    try:
+        assert app.theme == THEMES[0]
+
+        theme_button = next(button for button in app.buttons if button.action == "theme")
+        app._handle_click(theme_button.rect.center)
+        assert app.theme == THEMES[1]
+        assert app._status_text(app.game.message) == f"主题：{THEMES[1].name_zh}"
+
+        app.language = "en"
+        app._handle_key(pygame.K_t)
+        assert app.theme == THEMES[2]
+        assert app._status_text(app.game.message) == f"Theme: {THEMES[2].name_en}"
+    finally:
+        pygame.quit()
+
+
+def test_all_themes_render() -> None:
+    app = WinlinezApp()
+    try:
+        for index in range(len(THEMES)):
+            app.theme_index = index
+            app.draw()
     finally:
         pygame.quit()
 

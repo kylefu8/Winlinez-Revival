@@ -49,6 +49,8 @@ Remove-WorkspaceChild (Join-Path $Root "dist")
 $AppName = "Winlinez-Revival"
 $Version = "1.0.2"
 $RepoUrl = "https://github.com/kylefu8/Winlinez-Revival"
+$IconPath = Join-Path $Root "assets\winlinez-icon.ico"
+$IconPngPath = Join-Path $Root "assets\winlinez-icon.png"
 $PortableDir = Join-Path $Root "dist\$AppName"
 $ExePath = Join-Path $PortableDir "$AppName.exe"
 $ZipPath = Join-Path $Root "dist\$AppName-portable.zip"
@@ -63,6 +65,8 @@ Remove-Item -LiteralPath $SpecPath -Force -ErrorAction SilentlyContinue
     --onefile `
     --windowed `
     --name $AppName `
+    --icon $IconPath `
+    --add-data "$IconPngPath;assets" `
     --distpath $PortableDir `
     --paths src `
     run_winlinez.py
